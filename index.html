@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockchain-Based Rental Agreement System</title>
+<style>
+:root{--bg:#eef0ff;--ink:#1f2350;--mut:#666c94;--pri:#5b3df5;--gold:#f5b301;--ok:#12a150;--okbg:#e6f7ee;--bad:#e5334b;--badbg:#fdeaee;--card:#fff;--line:#d9dcf5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Trebuchet MS",system-ui,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:16px 16px 90px}
+h1{margin:0;font-size:26px}h2{font-size:18px;margin:0 0 10px}
+section{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 16px;background:var(--pri);color:#fff;cursor:pointer;transition:transform .12s}
+button:hover:not(:disabled){transform:translateY(-2px)}button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
+:focus-visible{outline:3px solid #a99bff;outline-offset:2px}
+.mono{font-family:Consolas,monospace;font-size:12px;word-break:break-all}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+#coach{background:var(--pri);color:#fff;border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#coach .msg{flex:1 1 280px;font-size:18px;font-weight:700}#coach button{background:#fff;color:var(--pri)}
+#dots{display:flex;gap:6px;width:100%}#dots i{flex:1;height:8px;border-radius:4px;background:#ffffff55}#dots i.d{background:#fff}#dots i.c{background:var(--gold)}
+#people{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}@media(max-width:700px){#people{grid-template-columns:repeat(2,1fr)}}
+.person{border:3px solid var(--line);border-radius:16px;padding:12px;text-align:center;cursor:grab;background:#fafaff;user-select:none;transition:.15s}
+.person:hover{border-color:var(--pri)}.person.sel{border-color:var(--pri);background:#efeaff;transform:scale(1.04)}.person.over{border-color:var(--gold);background:#fff8e0}
+.av{font-size:44px;line-height:1.1}.bal{font-size:24px;font-weight:800}.bump{animation:bump .6s}
+@keyframes bump{40%{transform:scale(1.25);color:var(--ok)}}
+#pool{margin-top:12px;border:3px dashed var(--pri);border-radius:16px;padding:10px 14px;min-height:64px;background:#f6f4ff}
+.chip{display:inline-block;background:#fff;border:2px solid var(--gold);border-radius:20px;padding:4px 12px;margin:4px 6px 0 0;font-weight:700}
+#panel{border-color:var(--pri)}.big{font-size:34px;font-weight:800;text-align:center}
+#panel input[type=range],#diff{width:100%;accent-color:var(--pri)}.row{display:flex;gap:10px;flex-wrap:wrap}
+.shake{animation:shake .4s}@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#hashView{font:700 15px Consolas,monospace;word-break:break-all;background:#14163a;color:#b9bdf0;border-radius:12px;padding:12px;min-height:60px}
+#hashView .z{color:#3ddc84}
+#meter{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0}#meter div{height:100%;width:0;background:linear-gradient(90deg,var(--pri),var(--gold))}
+#chain{display:flex;align-items:stretch;overflow-x:auto;padding:8px 2px 12px}
+.block{flex:0 0 240px;border:3px solid var(--ok);border-radius:14px;padding:12px;background:var(--okbg);animation:pop .5s}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.block.bad{border-color:var(--bad);background:var(--badbg);animation:flash .6s var(--d) both}
+@keyframes flash{50%{transform:scale(1.05)}}
+.block h3{margin:0 0 6px;font-size:16px}.block input{width:74px;padding:3px 6px;border:2px solid var(--gold);border-radius:8px;font:inherit;background:#fff}
+.kv{font-size:13px;color:var(--mut);margin-top:5px}.flag{color:var(--bad);font-weight:700;font-size:13px;margin-top:6px}
+.link{flex:0 0 46px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.pill{border-radius:20px;padding:3px 12px;font-weight:700;font-size:14px}.pill.ok{background:var(--okbg);color:var(--ok)}.pill.bad{background:var(--badbg);color:var(--bad)}
+.gl button{margin:0 6px 6px 0;padding:6px 12px;font-size:14px}#gloss{background:#f6f4ff;border-radius:12px;padding:10px 12px;min-height:48px}
+#log div{padding:5px 0;border-bottom:1px solid var(--line);font-size:14px}#log .bad{color:var(--bad)}#log .good{color:var(--ok)}
+.pulse{animation:pulse 1.2s infinite;border-radius:16px}@keyframes pulse{50%{box-shadow:0 0 0 8px #f5b30188}}
+.coin{position:fixed;left:0;top:0;margin:-14px 0 0 -14px;font-size:28px;z-index:60;pointer-events:none}
+.conf{position:fixed;top:-30px;font-size:26px;z-index:70;pointer-events:none;animation:fall 2.4s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:24px;max-width:92vw;opacity:0;transition:opacity .25s;z-index:80;pointer-events:none;text-align:center}
+#toast.on{opacity:1}#toast.bad{background:var(--bad)}#toast.good{background:var(--ok)}
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,#fff,#f1efff);border-color:#cfc8ff}.system-badge{display:inline-block;background:#e9e5ff;color:var(--pri);font-size:12px;font-weight:900;border-radius:20px;padding:5px 10px;letter-spacing:.6px}.hero-stats{display:grid;gap:8px}.hero-stats div{background:#fff;border:2px solid var(--line);border-radius:12px;padding:9px 12px}.hero-stats b,.hero-stats span{display:block}.hero-stats span{font-size:12px;color:var(--mut)}.workflow{background:#fbfaff}.workflow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.workflow-grid div{background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px}.workflow-grid b,.workflow-grid span{display:block}.workflow-grid span{font-size:13px;color:var(--mut);margin-top:3px}@media(max-width:760px){.hero{grid-template-columns:1fr}.workflow-grid{grid-template-columns:1fr 1fr}}@media(max-width:500px){.workflow-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.grid2 section{margin:0}@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.fld{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}.fld label{font-size:13px;color:var(--mut)}
+.fld input{width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:10px;font:inherit}
+.acts{display:flex;flex-wrap:wrap;gap:8px}.acts button.d{background:var(--bad)}.acts button.g{background:var(--ok)}
+.st{display:inline-block;border-radius:20px;padding:3px 14px;font-weight:800;color:#fff}
+.vault{cursor:default;background:#fff8e0;border-color:var(--gold)}.role{font-weight:700;color:var(--pri)}
+#agBox div.l{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)}
+ul.rules{margin:0;padding-left:20px}ul.rules li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><div><h1>🏠 Blockchain-Based Rental Agreement System</h1><div class="mono">Smart-contract powered rental lifecycle • escrow • rent payments • immutable agreement history</div></div><button class="ghost" id="resetBtn">Start over</button></div>
+  <section class="hero">
+    <div><span class="system-badge">⛓️ BLOCKCHAIN RENTAL SYSTEM</span><h2 style="font-size:24px;margin:8px 0 4px">Digital rental agreements with verifiable terms</h2><p style="margin:0;color:var(--mut)">Create a lease, anchor its terms hash, lock the security deposit, record monthly rent, and permanently preserve the agreement lifecycle on the blockchain.</p></div>
+    <div class="hero-stats"><div><b>🔐 Escrow</b><span>Deposit locked by contract</span></div><div><b>📜 Terms hash</b><span>Document fingerprint</span></div><div><b>🧱 Immutable log</b><span>Blockchain history</span></div></div>
+  </section>
+  <div id="coach"><div class="msg" id="coachText"></div><button id="skipBtn">Skip step</button><button id="hideBtn">Hide guide</button><div id="dots"></div></div>
+
+  <section><h2>1. Who are you? <span class="mono" style="font-weight:400">tap a person to act as them</span></h2><div id="people"></div></section>
+
+  <div class="grid2">
+    <section>
+      <h2>2. Rental agreement actions as <span id="who"></span></h2>
+      <div class="fld">
+        <div><label for="prop">Property / unit</label><input id="prop" value="Flat 4B"></div>
+        <div><label for="leaseType">Lease type</label><input id="leaseType" value="Residential"></div>
+        <div><label for="rent">Monthly rent (ETH)</label><input id="rent" type="number" min="0" step="any" value="2"></div>
+        <div><label for="dep">Deposit (ETH)</label><input id="dep" type="number" min="0" step="any" value="4"></div>
+        <div><label for="mon">Months</label><input id="mon" type="number" min="1" step="1" value="3"></div>
+        <div><label for="ded">Deduction when ending (ETH)</label><input id="ded" type="number" min="0" step="any" value="0"></div>
+        <div><label for="ref">Agreement reference</label><input id="ref" value="RA-2026-001"></div>
+      </div>
+      <div class="acts">
+        <button id="bCreate">📄 Create agreement</button><button id="bHash" class="ghost">🔐 Anchor terms hash</button><button id="bSign">✍️ Sign & pay deposit</button><button id="bPay">💸 Pay rent</button>
+        <button id="bEnd" class="g">🏁 End agreement</button><button id="bTerm" class="d">🚫 Terminate</button><button id="bCancel" class="ghost">❌ Cancel listing</button>
+      </div>
+      <div class="mono" style="margin-top:8px">Any person can press any button. The smart contract decides what is allowed.</div>
+    </section>
+    <section>
+      <h2>📜 Rental agreement <span class="mono" style="font-weight:400">verified contract state</span></h2>
+      <div id="agBox"></div>
+      <div class="row" style="margin-top:10px"><button class="ghost" id="t15">⏩ +15 days</button><button class="ghost" id="t35">⏩ +35 days</button></div>
+    </section>
+  </div>
+
+  <section>
+    <h2>3. Transaction processing</h2>
+    <div id="pool"><b>📬 Waiting for a miner</b><div id="poolTx"></div></div>
+    <div id="hashView" style="margin-top:12px">Waiting for work. Press Mine block.</div>
+    <div id="meter"><div></div></div><div class="mono" id="tries" style="margin-bottom:10px"></div>
+    <label for="diff"><b>Difficulty:</b> hash must start with <b id="zeros"></b> <span id="odds" class="mono"></span></label>
+    <input type="range" id="diff" min="1" max="4" value="3">
+    <p style="margin:12px 0 0"><button id="mineBtn">⛏ Mine block</button></p>
+  </section>
+
+  <section>
+    <div class="top"><h2 style="margin:0">4. 🔗 Blockchain ledger — permanent rental record</h2><span class="pill ok" id="status"></span></div>
+    <div id="chain"></div>
+    <div class="mono">Tip: click an amount inside a block to forge the record, then see what breaks.</div>
+  </section>
+
+  <section class="workflow">
+    <h2>🔄 Rental agreement workflow</h2>
+    <div class="workflow-grid">
+      <div><b>1. Create</b><span>Landlord publishes property, rent, deposit and duration.</span></div>
+      <div><b>2. Anchor</b><span>Agreement terms are fingerprinted with a hash.</span></div>
+      <div><b>3. Sign</b><span>Tenant accepts and deposits funds into escrow.</span></div>
+      <div><b>4. Pay</b><span>Monthly rent is recorded and transferred to the landlord.</span></div>
+      <div><b>5. Complete</b><span>Deposit is refunded minus an agreed deduction.</span></div>
+      <div><b>6. Verify</b><span>Every action is preserved in the blockchain ledger.</span></div>
+    </div>
+  </section>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">
+    <section><h2>📖 Smart contract rules</h2><ul class="rules">
+      <li>Only the landlord can create, cancel, end or terminate.</li>
+      <li>The tenant signs by paying the exact deposit. It stays locked in escrow.</li>
+      <li>Rent is paid straight to the landlord: exact amount, once a month.</li>
+      <li>Rent more than 5 days late is recorded forever.</li>
+      <li>At the end the tenant gets the deposit back minus an agreed deduction (never more than the deposit).</li>
+      <li>If rent is over 30 days overdue, the landlord may terminate and keep the deposit.</li></ul></section>
+    <section><h2>Play-by-play</h2><div id="log"></div></section>
+  </div>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+//SHA-START
+const K=[],H0=[];
+(function(){let n=2,c=0;while(c<64){let p=true;for(let i=2;i*i<=n;i++)if(n%i==0){p=false;break}if(p){if(c<8)H0[c]=(Math.pow(n,.5)%1)*4294967296|0;K[c]=(Math.cbrt(n)%1)*4294967296|0;c++}n++}})();
+function sha256(s){
+  const b=new TextEncoder().encode(s),l=b.length,n=((l+9+63)>>6)<<6,m=new Uint8Array(n);
+  m.set(b);m[l]=0x80;const dv=new DataView(m.buffer);
+  dv.setUint32(n-4,(l*8)>>>0);dv.setUint32(n-8,Math.floor(l*8/4294967296));
+  let h=H0.slice();const w=new Int32Array(64);const r=(x,k)=>(x>>>k)|(x<<(32-k));
+  for(let o=0;o<n;o+=64){
+    for(let i=0;i<16;i++)w[i]=dv.getInt32(o+i*4);
+    for(let i=16;i<64;i++){const s0=r(w[i-15],7)^r(w[i-15],18)^(w[i-15]>>>3),s1=r(w[i-2],17)^r(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
+    let [a,b2,c,d,e,f,g,hh]=h;
+    for(let i=0;i<64;i++){
+      const S1=r(e,6)^r(e,11)^r(e,25),ch=(e&f)^(~e&g),t1=(hh+S1+ch+K[i]+w[i])|0;
+      const S0=r(a,2)^r(a,13)^r(a,22),mj=(a&b2)^(a&c)^(b2&c),t2=(S0+mj)|0;
+      hh=g;g=f;f=e;e=(d+t1)|0;d=c;c=b2;b2=a;a=(t1+t2)|0;
+    }
+    h=[(h[0]+a)|0,(h[1]+b2)|0,(h[2]+c)|0,(h[3]+d)|0,(h[4]+e)|0,(h[5]+f)|0,(h[6]+g)|0,(h[7]+hh)|0];
+  }
+  return h.map(x=>(x>>>0).toString(16).padStart(8,"0")).join("");
+}
+//SHA-END
+const NAMES=["Alice","Bob","Carol"],AV={Alice:"🦊",Bob:"🐼",Carol:"🐸"},INIT={Alice:10,Bob:20,Carol:20};
+const ICON={CREATE:"📄",HASH:"🔐",SIGN:"✍️",PAY:"💸",END:"🏁",TERM:"🚫",CANCEL:"❌"},LABEL={CREATE:"Create agreement",HASH:"Anchor terms hash",SIGN:"Sign and pay deposit",PAY:"Pay rent",END:"End agreement",TERM:"Terminate",CANCEL:"Cancel listing"};
+const COL={Listed:"#5b3df5",Active:"#12a150",Completed:"#0e7490",Terminated:"#e5334b",Cancelled:"#666c94"};
+const LESSONS=[
+ {t:"Alice is the landlord. With Alice selected, press Create agreement.",tg:"#bCreate",ok:()=>pending.some(t=>t.type==="CREATE")||S().ag},
+ {t:"The agreement waits in the mempool. Press Mine block to record it on the blockchain.",tg:"#mineBtn",ok:()=>S().ag},
+ {t:"Now be the tenant: tap Bob, press Sign and pay deposit, then mine the block.",tg:"#bSign",ok:()=>{const a=S().ag;return a&&a.status!=="Listed"}},
+ {t:"Bob pays the first month's rent. Press Pay rent, then mine the block.",tg:"#bPay",ok:()=>S().ag&&S().ag.paid>=1},
+ {t:"Try to cheat the contract: tap Carol (a stranger) and press Pay rent.",tg:"#people",ok:()=>F.rej},
+ {t:"Try to forge history: change an amount inside a block on the chain.",tg:"#chain",ok:()=>F.broke},
+ {t:"Fix the chain: type the original amount back, or press Re-mine on the red blocks (earliest first). Note that re-mining keeps the forged amount.",tg:"#chain",ok:()=>F.broke&&valid()},
+ {t:"Finish the lease: Bob pays the remaining rent (mine after each payment), then Alice presses End agreement.",tg:"#bEnd",ok:()=>S().ag&&S().ag.status==="Completed"}];
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $=id=>document.getElementById(id),short=h=>h.slice(0,10)+"...",num=x=>+(+x).toFixed(4);
+const secret={};NAMES.forEach(n=>secret[n]=sha256("secret-"+n).slice(0,16));
+const addr=n=>"0x"+sha256("pub-"+secret[n]).slice(0,8);
+let chain=[],pending=[],logs=[],mining=false,txN=0,actor="Alice",simDay=0,step=0,guide=true,F={},prev={},ripple=0,tt;
+
+const hashBlock=b=>sha256(b.index+"|"+b.prev+"|"+b.day+"|"+JSON.stringify(b.txs)+"|"+b.nonce);
+function say(m,c=""){logs.unshift({m,c});logs=logs.slice(0,25);const t=$("toast");t.textContent=m;t.className="on "+c;clearTimeout(tt);tt=setTimeout(()=>t.className="",4200);}
+function status(){return chain.map((b,i)=>{const ownOk=hashBlock(b)===b.hash&&b.hash.startsWith("0".repeat(b.diff)),linkOk=i===0||b.prev===hashBlock(chain[i-1]);return{ownOk,linkOk,ok:ownOk&&linkOk}});}
+const valid=()=>status().every(s=>s.ok);
+function newBlock(txs,diff){const p=chain[chain.length-1];return{index:chain.length,prev:p?p.hash:"0".repeat(64),day:simDay,txs,nonce:0,diff,hash:""};}
+
+/* The "smart contract": returns an error message, or "" when the action is allowed (mirrors RentalAgreement.sol) */
+function applyTx(s,t,day){const a=s.ag,f=t.from,B=s.bal,live=a&&a.status==="Active";
+ switch(t.type){
+ case"CREATE":
+  if(a&&(a.status==="Listed"||a.status==="Active"))return"An agreement is already open.";
+  if(!(t.rent>0))return"Rent must be above zero.";if(!(t.months>=1))return"Duration must be at least 1 month.";if(t.deposit<0)return"Deposit cannot be negative.";
+  s.ag={landlord:f,tenant:null,property:t.property,leaseType:t.leaseType||"Residential",reference:t.reference||"RA-2026-001",rent:t.rent,deposit:t.deposit,months:t.months,paid:0,late:0,status:"Listed",start:0,createdAt:day,termsHash:""};return"";
+ case"CANCEL":
+  if(!a||a.status!=="Listed")return"Only a listed agreement can be cancelled.";if(f!==a.landlord)return"Only the landlord can cancel.";a.status="Cancelled";return"";
+ case"SIGN":
+  if(!a||a.status!=="Listed")return"There is no agreement open for signing.";if(f===a.landlord)return"The landlord cannot rent their own property.";
+  if(t.amt!==a.deposit)return`The deposit must be exactly ${a.deposit} ETH.`;if(B[f]<t.amt)return`${f} cannot afford the deposit.`;
+  B[f]-=t.amt;s.escrow+=t.amt;a.tenant=f;a.status="Active";a.start=day;return"";
+ case"PAY":
+  if(!live)return"There is no active agreement.";if(f!==a.tenant)return"Only the tenant can pay rent.";if(a.paid>=a.months)return"All rent has already been paid.";
+  if(t.amt!==a.rent)return`Rent must be exactly ${a.rent} ETH.`;if(B[f]<t.amt)return`${f} cannot afford the rent.`;
+  B[f]-=t.amt;B[a.landlord]+=t.amt;if(day>a.start+30*a.paid+5)a.late++;a.paid++;return"";
+ case"END":
+  if(!live)return"There is no active agreement.";if(f!==a.landlord)return"Only the landlord can end the agreement.";
+  if(a.paid<a.months)return`Rent is not fully paid (${a.paid}/${a.months} months).`;if(t.amt>a.deposit)return"The deduction cannot exceed the deposit.";
+  B[a.tenant]+=a.deposit-t.amt;B[a.landlord]+=t.amt;s.escrow-=a.deposit;a.status="Completed";return"";
+ case"TERM":
+  if(!live)return"There is no active agreement.";if(f!==a.landlord)return"Only the landlord can terminate.";if(a.paid>=a.months)return"The tenant has paid everything.";
+  if(day<=a.start+30*a.paid+30)return"The tenant is not overdue by more than 30 days yet.";
+  B[a.landlord]+=a.deposit;s.escrow-=a.deposit;a.status="Terminated";return"";
+ }return"Unknown action.";}
+function replay(withPending){const s={bal:{...INIT},escrow:0,ag:null};chain.forEach(b=>b.txs.forEach(t=>applyTx(s,t,b.day)));if(withPending)pending.forEach(t=>applyTx(s,t,simDay));return s;}
+const S=()=>replay(false);
+
+function fly(a,b,txt){if(RM||!a||!b)return Promise.resolve();
+  const r1=a.getBoundingClientRect(),r2=b.getBoundingClientRect(),c=document.createElement("div");
+  c.className="coin";c.textContent=txt||"🪙";document.body.appendChild(c);
+  const x1=r1.left+r1.width/2,y1=r1.top+r1.height/2,x2=r2.left+r2.width/2,y2=r2.top+r2.height/2;
+  return c.animate([{transform:`translate(${x1}px,${y1}px)`},{transform:`translate(${(x1+x2)/2}px,${Math.min(y1,y2)-70}px) scale(1.6)`},{transform:`translate(${x2}px,${y2}px)`}],{duration:750,easing:"ease-in-out"}).finished.then(()=>c.remove());}
+const P=n=>document.querySelector(`[data-n="${n}"]`);
+function confetti(){if(RM)return;for(let i=0;i<40;i++){const e=document.createElement("div");e.className="conf";e.textContent=["🎉","🏠","🔑","✨"][i%4];e.style.left=Math.random()*100+"vw";e.style.animationDelay=Math.random()*.8+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),3500);}}
+
+function showHash(h,tries,exp){let k=0;while(h[k]==="0")k++;
+  $("hashView").innerHTML=`<span class="z">${h.slice(0,k)}</span>${h.slice(k)}`;$("meter").firstChild.style.width=Math.min(100,tries/exp*100)+"%";
+  $("tries").textContent=`Tried ${tries.toLocaleString()} nonces. This difficulty needs about ${exp.toLocaleString()} on average.`;}
+function mine(block,done){mining=true;block.nonce=0;render();let tries=0,last="",z="0".repeat(block.diff),exp=16**block.diff;
+  (function frame(){for(let i=0;i<150;i++){last=hashBlock(block);tries++;
+    if(last.startsWith(z)){block.hash=last;showHash(last,tries,exp);mining=false;done(tries);return}block.nonce++;}
+    showHash(last,tries,exp);requestAnimationFrame(frame);})();}
+
+function submit(type){if(mining)return;const s=replay(true),a=s.ag,t={type,from:actor};
+  if(type==="CREATE"){t.property=$("prop").value.trim()||"Property";t.leaseType=$("leaseType").value.trim()||"Residential";t.reference=$("ref").value.trim()||"RA-2026-001";t.rent=+$("rent").value;t.deposit=+$("dep").value;t.months=Math.floor($("mon").value);}
+  if(type==="SIGN")t.amt=a?a.deposit:0;if(type==="PAY")t.amt=a?a.rent:0;if(type==="END")t.amt=+$("ded").value||0;
+  const e=applyTx(s,t,simDay);
+  if(e){F.rej=true;say(`The smart contract rejected it: ${e}`,"bad");if(!RM)$("agBox").animate([{transform:"translateX(-8px)"},{transform:"translateX(8px)"},{transform:"none"}],{duration:300});return render();}
+  t.sig=sha256(secret[actor]+type+(txN++)).slice(0,16);pending.push(t);
+  say(`${actor} signed "${LABEL[type]}". It waits in the mempool until a miner records it.`,"good");
+  fly(P(actor),$("pool"),ICON[type]).then(render);render();}
+function mineClick(){if(mining)return;
+  if(!valid())return say("Miners refuse to build on a broken chain. Re-mine the red blocks first.","bad");
+  if(!pending.length)return say("Nothing to record yet. Perform an action first.","bad");
+  const b=newBlock(pending.map(t=>({...t})),+$("diff").value);
+  say(`Mining block #${b.index}: searching for a nonce so the hash starts with ${"0".repeat(b.diff)}...`);
+  mine(b,tries=>{chain.push(b);pending=[];render();$("chain").scrollLeft=1e6;say(`Block #${b.index} mined in ${tries.toLocaleString()} tries. The actions are now permanent.`,"good");});}
+function remine(i){if(mining)return;const b=chain[i];if(i>0)b.prev=hashBlock(chain[i-1]);
+  say(`Re-mining block #${i}. Forging the record means redoing this work for every later block too.`);
+  mine(b,t=>{say(`Block #${i} repaired (${t.toLocaleString()} tries).`,"good");render();});}
+function edit(i,j,v){const t=chain[i].txs[j];t[t.type==="CREATE"?"rent":"amt"]=Math.max(0,+v||0);F.broke=true;ripple=i;
+  say(`You forged a record in block #${i}. Watch the red blocks spread along the chain!`,"bad");render();}
+function advance(n){simDay+=n;say(`Time moves forward ${n} days. It is now day ${simDay}.`);render();}
+function reset(){chain=[];pending=[];logs=[];txN=0;simDay=0;step=0;F={};prev={};actor="Alice";
+  const g=newBlock([],2);mine(g,()=>{chain.push(g);say("Genesis block created. Alice has 10 ETH, Bob and Carol have 20 ETH each.");render();});}
+
+function txText(t,i,j){const inp=(v)=>`<input type="number" step="any" value="${v}" aria-label="Amount, block ${i} action ${j}" onchange="edit(${i},${j},this.value)">`;
+  const w=`${ICON[t.type]} ${AV[t.from]} ${t.from} `;
+  return t.type==="CREATE"?`${w}lists "${t.property}", rent ${inp(t.rent)} ETH, deposit ${t.deposit}, ${t.months} months`:
+   t.type==="SIGN"?`${w}signs, deposit ${inp(t.amt)} ETH`:t.type==="PAY"?`${w}pays rent ${inp(t.amt)} ETH`:
+   t.type==="END"?`${w}ends lease, deduction ${inp(t.amt)} ETH`:t.type==="TERM"?`${w}terminates the lease`:`${w}cancels the listing`;}
+
+function render(){
+  const s=S(),st=status(),ok=st.every(x=>x.ok),bi=st.findIndex(x=>!x.ok),a=s.ag;
+  $("people").innerHTML=NAMES.map(n=>{const role=a&&a.status!=="Cancelled"?(n===a.landlord?"🏠 Landlord":n===a.tenant?"🔑 Tenant":"👤 Stranger"):"👤 No role yet";
+    return`<div class="person ${actor===n?"sel":""}" tabindex="0" role="button" data-n="${n}" aria-label="Act as ${n}, ${num(s.bal[n])} ETH"><div class="av">${AV[n]}</div><b>${n}</b><div class="mono role">${role}</div><div class="mono">${addr(n)}</div><div class="bal ${prev[n]!==undefined&&prev[n]!==s.bal[n]?"bump":""}">${num(s.bal[n])} ETH</div></div>`}).join("")+
+    `<div class="person vault"><div class="av">🔒</div><b>Escrow</b><div class="mono">deposit held by contract</div><div class="bal">${num(s.escrow)} ETH</div></div>`;
+  prev={...s.bal};$("who").textContent=AV[actor]+" "+actor;
+  if(!a)$("agBox").innerHTML='<p class="mono">No agreement on the blockchain yet. The landlord creates one.</p>';
+  else{const due=a.start+30*a.paid,live=a.status==="Active"&&a.paid<a.months,late=live&&simDay>due+5,over=live&&simDay>due+30;
+    const row=(k,v)=>`<div class="l"><span>${k}</span><b>${v}</b></div>`;
+    $("agBox").innerHTML=`<div style="margin-bottom:8px"><span class="st" style="background:${COL[a.status]}">${a.status}</span></div>`+
+      row("Property",a.property)+row("Lease type",a.leaseType||"Residential")+row("Reference",a.reference||"RA-2026-001")+row("Landlord",AV[a.landlord]+" "+a.landlord)+row("Tenant",a.tenant?AV[a.tenant]+" "+a.tenant:"none yet")+row("Rent / deposit",`${a.rent} / ${a.deposit} ETH`)+row("Terms hash",a.termsHash?`<span class="mono">${short(a.termsHash)}</span>`:"not anchored")+
+      row("Rent paid",`${a.paid} of ${a.months} months`)+row("Late payments",a.late)+
+      (live?row("Next rent due",`day ${due}`+(over?" 🚨 over 30 days late":late?" ⚠ late":"")):"")+
+      `<div id="meter" style="margin-top:8px"><div style="width:${a.paid/a.months*100}%"></div></div>`+
+      `<div class="mono">Today is day ${simDay}${pending.length?" · "+pending.length+" action(s) waiting to be mined":""}</div>`;}
+  $("poolTx").innerHTML=pending.length?pending.map(t=>`<span class="chip" title="signature ${t.sig}">${ICON[t.type]} ${t.from}: ${LABEL[t.type]}</span>`).join(""):'<div class="mono" style="margin-top:6px">Empty</div>';
+  $("zeros").textContent='"'+"0".repeat(+$("diff").value)+'"';$("odds").textContent=`(about 1 guess in ${(16**+$("diff").value).toLocaleString()} works)`;
+  $("mineBtn").disabled=mining;$("resetBtn").disabled=mining;
+  $("status").className="pill "+(ok?"ok":"bad");$("status").textContent=ok?"Chain valid ✓":`Broken at block #${bi}`;
+  $("chain").innerHTML=chain.map((b,i)=>{const x=st[i];return(i?`<div class="link">${x.linkOk?"🔗":"💥"}</div>`:"")+
+    `<div class="block ${x.ok?"":"bad"}" style="--d:${Math.max(0,i-ripple)*.25}s"><h3>Block #${b.index}${i?"":" (genesis)"}</h3><div class="kv">Day ${b.day}</div>
+    ${b.txs.length?b.txs.map((t,j)=>`<div style="margin-top:4px">${txText(t,i,j)}</div>`).join(""):'<div class="kv">No actions</div>'}
+    <div class="kv">Nonce <span class="mono">${b.nonce}</span></div><div class="kv">Previous <span class="mono">${short(b.prev)}</span></div><div class="kv">Hash <span class="mono">${short(b.hash)}</span></div>
+    ${!x.ownOk?'<div class="flag">Contents changed: hash no longer matches</div>':!x.linkOk?'<div class="flag">Previous block changed: link broken</div>':""}
+    ${x.ok?"":`<p style="margin:8px 0 0"><button ${mining?"disabled":""} onclick="remine(${i})">Re-mine</button></p>`}</div>`}).join("");
+  $("log").innerHTML=logs.map(l=>`<div class="${l.c}">${l.m}</div>`).join("")||'<div class="mono">Your actions appear here.</div>';
+  if(!mining)while(step<LESSONS.length&&LESSONS[step].ok()){step++;if(step===LESSONS.length){confetti();say("Lease completed! You have seen agreements, escrow, rent and tamper-proof records.","good");}}
+  $("coach").hidden=!guide;$("coachText").textContent=step<LESSONS.length?LESSONS[step].t:"🎉 All done! Keep experimenting with new agreements.";
+  $("dots").innerHTML=LESSONS.map((_,i)=>`<i class="${i<step?"d":i===step?"c":""}"></i>`).join("");$("skipBtn").hidden=step>=LESSONS.length;
+  document.querySelectorAll(".pulse").forEach(e=>e.classList.remove("pulse"));
+  if(guide&&step<LESSONS.length)document.querySelectorAll(LESSONS[step].tg).forEach(e=>e.classList.add("pulse"));
+}
+
+const pe=$("people");
+pe.onclick=e=>{const c=e.target.closest(".person[data-n]");if(c&&!mining){actor=c.dataset.n;render()}};
+pe.onkeydown=e=>{const c=e.target.closest(".person[data-n]");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();actor=c.dataset.n;render()}};
+[["bCreate","CREATE"],["bHash","HASH"],["bSign","SIGN"],["bPay","PAY"],["bEnd","END"],["bTerm","TERM"],["bCancel","CANCEL"]].forEach(([id,ty])=>$(id).onclick=()=>submit(ty));
+$("mineBtn").onclick=mineClick;$("resetBtn").onclick=reset;$("diff").oninput=render;
+$("t15").onclick=()=>advance(15);$("t35").onclick=()=>advance(35);
+$("skipBtn").onclick=()=>{step++;render()};$("hideBtn").onclick=()=>{guide=false;render()};
+reset();
+</script>
+</body>
+</html>
