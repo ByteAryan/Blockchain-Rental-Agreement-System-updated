@@ -17,6 +17,9 @@ button.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
 :focus-visible{outline:3px solid #a99bff;outline-offset:2px}
 .mono{font-family:Consolas,monospace;font-size:12px;word-break:break-all}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}@media(max-width:800px){.profile-grid{grid-template-columns:1fr}}
+.profile-card{border:3px solid var(--line);border-radius:16px;padding:16px;background:#fafaff;cursor:pointer;transition:.15s;position:relative}.profile-card:hover{border-color:var(--pri);transform:translateY(-2px)}.profile-card.active{border-color:var(--pri);background:#efeaff;box-shadow:0 8px 22px #5b3df522}.profile-card .profile-icon{font-size:40px}.profile-card h3{margin:4px 0}.profile-card p{margin:3px 0;color:var(--mut);font-size:13px}.profile-tag{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:20px;background:#fff;border:1px solid var(--line);font-weight:700;font-size:12px}.dashboard{border-color:var(--pri);background:linear-gradient(135deg,#fff,#f7f5ff)}.dash-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.dash-title{font-size:21px;font-weight:800}.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}@media(max-width:760px){.dash-grid{grid-template-columns:1fr}}.dash-stat{background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px}.dash-stat b{display:block;font-size:18px}.dash-stat span{font-size:12px;color:var(--mut)}.profile-note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#f6f4ff;font-size:13px}.readonly{opacity:.75}.role-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.role-actions button.hidden{display:none!important}.acts button.hidden{display:none!important}
+
 #coach{background:var(--pri);color:#fff;border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 #coach .msg{flex:1 1 280px;font-size:18px;font-weight:700}#coach button{background:#fff;color:var(--pri)}
 #dots{display:flex;gap:6px;width:100%}#dots i{flex:1;height:8px;border-radius:4px;background:#ffffff55}#dots i.d{background:#fff}#dots i.c{background:var(--gold)}
@@ -39,7 +42,7 @@ button.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
 .block.bad{border-color:var(--bad);background:var(--badbg);animation:flash .6s var(--d) both}
 @keyframes flash{50%{transform:scale(1.05)}}
 .block h3{margin:0 0 6px;font-size:16px}.block input{width:74px;padding:3px 6px;border:2px solid var(--gold);border-radius:8px;font:inherit;background:#fff}
-.kv{font-size:13px;color:var(--mut);margin-top:5px}.flag{color:var(--bad);font-weight:700;font-size:13px;margin-top:6px}
+.kv{font-size:13px;color:var(--mut);margin-top:5px}.flag{color:var(--bad);font-weight:700;font-size:13px;margin-top:6px}.overdue-alert{margin-top:10px;padding:12px;border:3px solid var(--bad);border-radius:12px;background:var(--badbg);color:var(--bad);font-weight:900}.overdue-alert .days{font-size:24px;display:block;margin-top:2px}.overdue-alert .detail{font-size:12px;font-weight:700;margin-top:3px}
 .link{flex:0 0 46px;display:flex;align-items:center;justify-content:center;font-size:24px}
 .pill{border-radius:20px;padding:3px 12px;font-weight:700;font-size:14px}.pill.ok{background:var(--okbg);color:var(--ok)}.pill.bad{background:var(--badbg);color:var(--bad)}
 .gl button{margin:0 6px 6px 0;padding:6px 12px;font-size:14px}#gloss{background:#f6f4ff;border-radius:12px;padding:10px 12px;min-height:48px}
@@ -72,11 +75,16 @@ ul.rules{margin:0;padding-left:20px}ul.rules li{margin-bottom:4px}
   </section>
   <div id="coach"><div class="msg" id="coachText"></div><button id="skipBtn">Skip step</button><button id="hideBtn">Hide guide</button><div id="dots"></div></div>
 
-  <section><h2>1. Who are you? <span class="mono" style="font-weight:400">tap a person to act as them</span></h2><div id="people"></div></section>
+  <section class="dashboard">
+    <div class="dash-head"><div><div class="dash-title">👥 User Profiles & Dashboards</div><div class="mono">Select a profile to open its dedicated rental dashboard.</div></div><span class="pill ok" id="profileStatus">Select a person</span></div>
+    <div id="profiles" class="profile-grid"></div>
+    <div id="profileDashboard" class="profile-note"></div>
+    <div id="people" style="display:none"></div>
+  </section>
 
   <div class="grid2">
     <section>
-      <h2>2. Rental agreement actions as <span id="who"></span></h2>
+      <h2>2. Dashboard actions — <span id="who"></span></h2>
       <div class="fld">
         <div><label for="prop">Property / unit</label><input id="prop" value="Flat 4B"></div>
         <div><label for="leaseType">Lease type</label><input id="leaseType" value="Residential"></div>
@@ -90,7 +98,7 @@ ul.rules{margin:0;padding-left:20px}ul.rules li{margin-bottom:4px}
         <button id="bCreate">📄 Create agreement</button><button id="bHash" class="ghost">🔐 Anchor terms hash</button><button id="bSign">✍️ Sign & pay deposit</button><button id="bPay">💸 Pay rent</button>
         <button id="bEnd" class="g">🏁 End agreement</button><button id="bTerm" class="d">🚫 Terminate</button><button id="bCancel" class="ghost">❌ Cancel listing</button>
       </div>
-      <div class="mono" style="margin-top:8px">Any person can press any button. The smart contract decides what is allowed.</div>
+      <div id="roleHelp" class="profile-note">Actions shown here depend on the selected profile. The smart contract still enforces the final permissions.</div>
     </section>
     <section>
       <h2>📜 Rental agreement <span class="mono" style="font-weight:400">verified contract state</span></h2>
@@ -163,18 +171,18 @@ function sha256(s){
   return h.map(x=>(x>>>0).toString(16).padStart(8,"0")).join("");
 }
 //SHA-END
-const NAMES=["Alice","Bob","Carol"],AV={Alice:"🦊",Bob:"🐼",Carol:"🐸"},INIT={Alice:10,Bob:20,Carol:20};
+const NAMES=["Alice","Bob","Stranger"],AV={Alice:"👩🏻",Bob:"👨🏻",Stranger:"👩🏽"},INIT={Alice:10,Bob:20,Stranger:20};
 const ICON={CREATE:"📄",HASH:"🔐",SIGN:"✍️",PAY:"💸",END:"🏁",TERM:"🚫",CANCEL:"❌"},LABEL={CREATE:"Create agreement",HASH:"Anchor terms hash",SIGN:"Sign and pay deposit",PAY:"Pay rent",END:"End agreement",TERM:"Terminate",CANCEL:"Cancel listing"};
 const COL={Listed:"#5b3df5",Active:"#12a150",Completed:"#0e7490",Terminated:"#e5334b",Cancelled:"#666c94"};
 const LESSONS=[
- {t:"Alice is the landlord. With Alice selected, press Create agreement.",tg:"#bCreate",ok:()=>pending.some(t=>t.type==="CREATE")||S().ag},
+ {t:"Choose any person and press Create agreement. The person who creates it becomes the landlord.",tg:"#bCreate",ok:()=>pending.some(t=>t.type==="CREATE")||S().ag},
  {t:"The agreement waits in the mempool. Press Mine block to record it on the blockchain.",tg:"#mineBtn",ok:()=>S().ag},
- {t:"Now be the tenant: tap Bob, press Sign and pay deposit, then mine the block.",tg:"#bSign",ok:()=>{const a=S().ag;return a&&a.status!=="Listed"}},
- {t:"Bob pays the first month's rent. Press Pay rent, then mine the block.",tg:"#bPay",ok:()=>S().ag&&S().ag.paid>=1},
- {t:"Try to cheat the contract: tap Carol (a stranger) and press Pay rent.",tg:"#people",ok:()=>F.rej},
+ {t:"Choose a different person, press Sign and pay deposit, then mine the block. That person becomes the tenant.",tg:"#bSign",ok:()=>{const a=S().ag;return a&&a.status!=="Listed"}},
+ {t:"The tenant pays the first month's rent. Press Pay rent, then mine the block.",tg:"#bPay",ok:()=>S().ag&&S().ag.paid>=1},
+ {t:"Choose a person who is not the tenant and try to Pay rent. The smart contract should reject it.",tg:"#profiles",ok:()=>F.rej},
  {t:"Try to forge history: change an amount inside a block on the chain.",tg:"#chain",ok:()=>F.broke},
  {t:"Fix the chain: type the original amount back, or press Re-mine on the red blocks (earliest first). Note that re-mining keeps the forged amount.",tg:"#chain",ok:()=>F.broke&&valid()},
- {t:"Finish the lease: Bob pays the remaining rent (mine after each payment), then Alice presses End agreement.",tg:"#bEnd",ok:()=>S().ag&&S().ag.status==="Completed"}];
+ {t:"Finish the lease: the tenant pays the remaining rent (mine after each payment), then the landlord presses End agreement.",tg:"#bEnd",ok:()=>S().ag&&S().ag.status==="Completed"}];
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $=id=>document.getElementById(id),short=h=>h.slice(0,10)+"...",num=x=>+(+x).toFixed(4);
 const secret={};NAMES.forEach(n=>secret[n]=sha256("secret-"+n).slice(0,16));
@@ -194,6 +202,9 @@ function applyTx(s,t,day){const a=s.ag,f=t.from,B=s.bal,live=a&&a.status==="Acti
   if(a&&(a.status==="Listed"||a.status==="Active"))return"An agreement is already open.";
   if(!(t.rent>0))return"Rent must be above zero.";if(!(t.months>=1))return"Duration must be at least 1 month.";if(t.deposit<0)return"Deposit cannot be negative.";
   s.ag={landlord:f,tenant:null,property:t.property,leaseType:t.leaseType||"Residential",reference:t.reference||"RA-2026-001",rent:t.rent,deposit:t.deposit,months:t.months,paid:0,late:0,status:"Listed",start:0,createdAt:day,termsHash:""};return"";
+ case"HASH":
+  if(!a)return"Create the rental agreement before anchoring its terms.";if(f!==a.landlord)return"Only the owner can anchor the agreement terms.";if(a.status!=="Listed")return"Terms can only be anchored before the tenant signs.";
+  if(a.termsHash)return"The agreement terms are already anchored.";a.termsHash=sha256([a.reference,a.property,a.leaseType,a.rent,a.deposit,a.months].join("|"));return"";
  case"CANCEL":
   if(!a||a.status!=="Listed")return"Only a listed agreement can be cancelled.";if(f!==a.landlord)return"Only the landlord can cancel.";a.status="Cancelled";return"";
  case"SIGN":
@@ -253,7 +264,7 @@ function edit(i,j,v){const t=chain[i].txs[j];t[t.type==="CREATE"?"rent":"amt"]=M
   say(`You forged a record in block #${i}. Watch the red blocks spread along the chain!`,"bad");render();}
 function advance(n){simDay+=n;say(`Time moves forward ${n} days. It is now day ${simDay}.`);render();}
 function reset(){chain=[];pending=[];logs=[];txN=0;simDay=0;step=0;F={};prev={};actor="Alice";
-  const g=newBlock([],2);mine(g,()=>{chain.push(g);say("Genesis block created. Alice has 10 ETH, Bob and Carol have 20 ETH each.");render();});}
+  const g=newBlock([],2);mine(g,()=>{chain.push(g);say("Genesis block created. Alice has 10 ETH, Bob and Stranger have 20 ETH each.");render();});}
 
 function txText(t,i,j){const inp=(v)=>`<input type="number" step="any" value="${v}" aria-label="Amount, block ${i} action ${j}" onchange="edit(${i},${j},this.value)">`;
   const w=`${ICON[t.type]} ${AV[t.from]} ${t.from} `;
@@ -263,17 +274,37 @@ function txText(t,i,j){const inp=(v)=>`<input type="number" step="any" value="${
 
 function render(){
   const s=S(),st=status(),ok=st.every(x=>x.ok),bi=st.findIndex(x=>!x.ok),a=s.ag;
-  $("people").innerHTML=NAMES.map(n=>{const role=a&&a.status!=="Cancelled"?(n===a.landlord?"🏠 Landlord":n===a.tenant?"🔑 Tenant":"👤 Stranger"):"👤 No role yet";
-    return`<div class="person ${actor===n?"sel":""}" tabindex="0" role="button" data-n="${n}" aria-label="Act as ${n}, ${num(s.bal[n])} ETH"><div class="av">${AV[n]}</div><b>${n}</b><div class="mono role">${role}</div><div class="mono">${addr(n)}</div><div class="bal ${prev[n]!==undefined&&prev[n]!==s.bal[n]?"bump":""}">${num(s.bal[n])} ETH</div></div>`}).join("")+
-    `<div class="person vault"><div class="av">🔒</div><b>Escrow</b><div class="mono">deposit held by contract</div><div class="bal">${num(s.escrow)} ETH</div></div>`;
-  prev={...s.bal};$("who").textContent=AV[actor]+" "+actor;
+  const icons={Alice:"👩🏻",Bob:"👨🏻",Stranger:"👩🏽"};
+  const roleOf=n=>a&&a.status!=="Cancelled"?(n===a.landlord?"Owner / Landlord":n===a.tenant?"Tenant":"No contract role"):"No role yet";
+  const currentRole=roleOf(actor);
+  const roleInfo=currentRole==="Owner / Landlord"?{label:"Owner / Landlord",icon:"🏠",desc:"This person created the rental agreement and controls landlord actions.",actions:"Anchor terms, cancel, end and terminate"}:currentRole==="Tenant"?{label:"Tenant",icon:"🔑",desc:"This person signed the rental agreement and controls tenant payments.",actions:"Pay rent and view lease status"}:{label:"No contract role",icon:"👤",desc:a?"This person is not currently assigned to this rental agreement.":"This person has no role yet. Any person can create the first agreement.",actions:a&&a.status==="Listed"?"Sign and pay the deposit":"Create an agreement"};
+  $("profiles").innerHTML=NAMES.map(n=>{const role=roleOf(n);const icon=icons[n];return`<div class="profile-card ${actor===n?"active":""}" data-profile="${n}" tabindex="0" role="button"><div class="profile-icon">${icon}</div><h3>${n}</h3><div class="role">${role}</div><p>${n===a?.landlord?"Agreement owner":n===a?.tenant?"Agreement tenant":a?"Not assigned to this agreement":"No role assigned yet"}</p><span class="profile-tag">${role}</span><div class="bal" style="margin-top:8px">${num(s.bal[n])} ETH</div></div>`}).join("");
+  $("profileStatus").textContent=`${actor} • ${roleInfo.label}`;
+  $("profileDashboard").innerHTML=`<b>${roleInfo.icon} ${actor}'s Profile</b><br>${roleInfo.desc} <b>Available:</b> ${roleInfo.actions}. <span class="mono">Wallet: ${addr(actor)}</span>`;
+  $("who").textContent=icons[actor]+" "+actor+" • "+currentRole;
+  $("roleHelp").textContent=`Roles are assigned by the rental workflow, not by the person's name. ${actor} currently has: ${currentRole}. The smart-contract simulation enforces the final permissions.`;
+  prev={...s.bal};
+  const isOwner=a&&a.status!=="Cancelled"&&actor===a.landlord;
+  const isTenant=a&&a.status==="Active"&&actor===a.tenant;
+  const canCreate=!a || a.status==="Cancelled";
+  const canSign=a&&a.status==="Listed"&&actor!==a.landlord;
+  const canHash=isOwner&&a.status==="Listed";
+  const canCancel=isOwner&&a.status==="Listed";
+  const canEnd=isOwner&&a.status==="Active";
+  const canTerm=isOwner&&a.status==="Active";
+  const perms={bCreate:canCreate,bHash:canHash,bSign:canSign,bPay:isTenant,bEnd:canEnd,bTerm:canTerm,bCancel:canCancel};
+  ["bCreate","bHash","bSign","bPay","bEnd","bTerm","bCancel"].forEach(id=>{const el=$(id);el.classList.toggle("hidden",!perms[id]);el.disabled=mining;});
+  const ownerFields=["prop","leaseType","rent","dep","mon","ref","ded"];
+  ownerFields.forEach(id=>{const el=$(id),wrap=el.parentElement;wrap.style.display="block";el.readOnly=!!a&&!isOwner;});
+  $("ded").parentElement.style.display=isOwner?"block":"none";
   if(!a)$("agBox").innerHTML='<p class="mono">No agreement on the blockchain yet. The landlord creates one.</p>';
-  else{const due=a.start+30*a.paid,live=a.status==="Active"&&a.paid<a.months,late=live&&simDay>due+5,over=live&&simDay>due+30;
+  else{const due=a.start+30*a.paid,live=a.status==="Active"&&a.paid<a.months,overdueDays=live&&simDay>due?simDay-due:0,late=overdueDays>5,over=overdueDays>30;
     const row=(k,v)=>`<div class="l"><span>${k}</span><b>${v}</b></div>`;
     $("agBox").innerHTML=`<div style="margin-bottom:8px"><span class="st" style="background:${COL[a.status]}">${a.status}</span></div>`+
       row("Property",a.property)+row("Lease type",a.leaseType||"Residential")+row("Reference",a.reference||"RA-2026-001")+row("Landlord",AV[a.landlord]+" "+a.landlord)+row("Tenant",a.tenant?AV[a.tenant]+" "+a.tenant:"none yet")+row("Rent / deposit",`${a.rent} / ${a.deposit} ETH`)+row("Terms hash",a.termsHash?`<span class="mono">${short(a.termsHash)}</span>`:"not anchored")+
       row("Rent paid",`${a.paid} of ${a.months} months`)+row("Late payments",a.late)+
       (live?row("Next rent due",`day ${due}`+(over?" 🚨 over 30 days late":late?" ⚠ late":"")):"")+
+      (live&&overdueDays>0?`<div class="overdue-alert" role="alert">⚠ STRICT OVERDUE RENT WARNING<span class="days">${overdueDays} day${overdueDays===1?"":"s"} overdue</span><div class="detail">Rent deadline was day ${due}. Pay the exact rent amount now to clear the overdue status.</div></div>`:"")+
       `<div id="meter" style="margin-top:8px"><div style="width:${a.paid/a.months*100}%"></div></div>`+
       `<div class="mono">Today is day ${simDay}${pending.length?" · "+pending.length+" action(s) waiting to be mined":""}</div>`;}
   $("poolTx").innerHTML=pending.length?pending.map(t=>`<span class="chip" title="signature ${t.sig}">${ICON[t.type]} ${t.from}: ${LABEL[t.type]}</span>`).join(""):'<div class="mono" style="margin-top:6px">Empty</div>';
@@ -294,9 +325,9 @@ function render(){
   if(guide&&step<LESSONS.length)document.querySelectorAll(LESSONS[step].tg).forEach(e=>e.classList.add("pulse"));
 }
 
-const pe=$("people");
-pe.onclick=e=>{const c=e.target.closest(".person[data-n]");if(c&&!mining){actor=c.dataset.n;render()}};
-pe.onkeydown=e=>{const c=e.target.closest(".person[data-n]");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();actor=c.dataset.n;render()}};
+const pe=$("profiles");
+pe.onclick=e=>{const c=e.target.closest(".profile-card[data-profile]");if(c&&!mining){actor=c.dataset.profile;render()}};
+pe.onkeydown=e=>{const c=e.target.closest(".profile-card[data-profile]");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();actor=c.dataset.profile;render()}};
 [["bCreate","CREATE"],["bHash","HASH"],["bSign","SIGN"],["bPay","PAY"],["bEnd","END"],["bTerm","TERM"],["bCancel","CANCEL"]].forEach(([id,ty])=>$(id).onclick=()=>submit(ty));
 $("mineBtn").onclick=mineClick;$("resetBtn").onclick=reset;$("diff").oninput=render;
 $("t15").onclick=()=>advance(15);$("t35").onclick=()=>advance(35);
